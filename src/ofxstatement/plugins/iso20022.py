@@ -136,7 +136,11 @@ class Iso20022Parser(AbstractStatementParser):
             if amt_ccy != self.statement.currency:
                 continue
 
-            bal_amts[cd.text] = self._parse_amount(amt)
+            cdtdbtind = bal.find("./s:CdtDbtInd", self.xmlns)
+            credit: bool = cdtdbtind is None or cdtdbtind.text == CD_CREDIT
+            bal_amts[cd.text] = (
+                self._parse_amount(amt) if credit else -self._parse_amount(amt)
+            )
             bal_dates[cd.text] = self._parse_date(dt)
 
         if not bal_amts:
